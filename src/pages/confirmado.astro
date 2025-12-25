@@ -1,0 +1,148 @@
+---
+const PARTY = {
+  cumpleanera: "Lya Khalesy",
+  fecha: "Domingo 4 de Enero",
+  hora: "4:30 PM",
+  lugar: "Mz. 03 Lote 15 Urb. Los Jazmines",
+  mapsUrl: "https://maps.app.goo.gl/mE68saYUG4gpmjT69",
+  whatsappUrl: "https://wa.me/51939464736?text=Hola%20tengo%20una%20consulta%20sobre%20la%20fiesta%20de%20Lya",
+};
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Confirmado ✅</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+    <link rel="icon" type="image/png" href="/kuromi-logo.png" />
+  </head>
+
+  <body>
+    <div class="stars"></div>
+
+    <main class="container">
+      <section class="card">
+        <div class="confetti"></div>
+
+        <div class="header">
+          <div>
+            <h1 class="title">¡Invitación desbloqueada!</h1>
+            <p class="subtitle">Gracias por confirmar tu asistencia 💜</p>
+          </div>
+        </div>
+
+        <div class="content">
+          <div class="grid">
+            <!-- IZQUIERDA: Step 4 bonito -->
+            <div class="panel fadeIn">
+              <div class="step4Wrap" id="step4Root">
+                <div class="confettiLayer" id="confettiLayer"></div>
+
+                <div class="step4Hero">
+                  <div class="step4Meta">
+                    <span class="chip ok">✅ Asistencia confirmada</span>
+                    <span class="chip" id="chipPar">Parentezco: —</span>
+                  </div>
+
+                  <h2 id="hello">¡Bienvenid@! 💜</h2>
+                  <span class="popCongrats">🎊 ¡Ya estás en la lista! 🎊</span>
+                </div>
+
+                <div class="step4Card">
+                  <h3>🎀 Cumple de {PARTY.cumpleanera}</h3>
+                  <div class="kv">
+                    <div>📅</div><p><b>Fecha:</b> {PARTY.fecha}</p>
+                    <div>⏰</div><p><b>Hora:</b> {PARTY.hora}</p>
+                    <div>📍</div><p><b>Lugar:</b> {PARTY.lugar}</p>
+                  </div>
+                </div>
+
+                <div class="btnRow">
+                  <a class="btn secondary btnWide" href={PARTY.whatsappUrl} target="_blank" rel="noreferrer">
+                    Escribir por WhatsApp
+                  </a>
+                  <a class="btn btnWide" href={PARTY.mapsUrl} target="_blank" rel="noreferrer">
+                    Ver ubicación 📍
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- DERECHA: Kuromi principal -->
+            <div class="panel kitty fadeIn">
+              <div class="blob"></div>
+              <div class="kuromiWrap">
+                <div class="sparkles"></div>
+                <img class="kuromiImg" src="/src/images/kuromi.png" alt="Kuromi" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      function getParam(k){
+        const u = new URL(window.location.href);
+        return u.searchParams.get(k) || "";
+      }
+      function escapeHtml(str){
+        return (str || "")
+          .replaceAll("&","&amp;")
+          .replaceAll("<","&lt;")
+          .replaceAll(">","&gt;");
+      }
+
+      function launchConfetti(container, count = 110){
+        container.innerHTML = "";
+        const colors = [
+          "rgba(255,90,214,.95)",
+          "rgba(100,231,255,.95)",
+          "rgba(183,133,255,.95)",
+          "rgba(255,255,255,.85)"
+        ];
+        const w = container.clientWidth || 320;
+
+        for(let i=0;i<count;i++){
+          const piece = document.createElement("div");
+          piece.className = "confettiPiece";
+          piece.style.left = `${Math.random() * (w - 10)}px`;
+          piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+          piece.style.width = `${6 + Math.random() * 10}px`;
+          piece.style.height = `${10 + Math.random() * 14}px`;
+          piece.style.setProperty("--x", `${(Math.random() * 160 - 80).toFixed(1)}px`);
+
+          const duration = (1.6 + Math.random() * 1.2).toFixed(2);
+          const delay = (Math.random() * 0.35).toFixed(2);
+          piece.style.animationDuration = `${duration}s`;
+          piece.style.animationDelay = `${delay}s`;
+
+          container.appendChild(piece);
+          setTimeout(() => piece.remove(), (parseFloat(duration) + parseFloat(delay)) * 1000 + 50);
+        }
+      }
+
+      const nombre = getParam("nombre");
+      const apellido = getParam("apellido");
+      const par = getParam("par");
+
+      const full = `${nombre} ${apellido}`.trim();
+      document.getElementById("hello").innerHTML =
+        `¡Bienvenid@, ${escapeHtml(full || "invitad@")}! 💜`;
+
+      document.getElementById("chipPar").textContent =
+        `Parentezco: ${par === "familia" ? "Familia" : "Amigos"}`;
+
+      const layer = document.getElementById("confettiLayer");
+      if(layer) launchConfetti(layer, 120);
+
+      // Reiniciar: borra localStorage y vuelve al inicio
+      document.getElementById("btnReset").onclick = () => {
+        localStorage.removeItem("kuromi_confirmed");
+        const basePath = window.location.pathname.split("/confirmado")[0].replace(/\/$/, "");
+        window.location.href = `${window.location.origin}${basePath}/`;
+      };
+    </script>
+  </body>
+</html>

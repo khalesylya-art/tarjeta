@@ -1,0 +1,290 @@
+---
+const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwrSFTPPJReYiIN2PWZuLwiDnLO_75ZeH8B27r5jjFIq0V8HgSa3LlbbD4NuJ2hbMzLBA/exec";
+
+const PARTY = {
+  cumpleanera: "Lya Khalesy",
+  edad: "6",
+  fecha: "Domingo 4 de Enero",
+  hora: "4:30 PM",
+  lugar: "Mz. 03 Lote 15 Urb. Los Jazmines",
+  incluye: ["Piñata y dulces", "Juegos y premios", "Snacks y gaseosa", "Sorpresitas Kuromi"],
+  mapsUrl: "https://maps.app.goo.gl/mE68saYUG4gpmjT69",
+  whatsappUrl: "https://wa.me/51939464736?text=Hola%20tengo%20una%20consulta%20sobre%20la%20fiesta%20de%20Lya",
+};
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Invitación Lya</title>
+    <link rel="stylesheet" href="/src/styles/global.css" />
+    <link rel="icon" type="image/png" href="/kuromi-logo.png" />
+  </head>
+
+  <body>
+    <div class="stars"></div>
+
+    <main class="container">
+      <section class="card">
+        <div class="confetti"></div>
+
+        <div class="header">
+          <div>
+            <div class="badge" id="badgePhone">🎀 Invitación</div>
+            <h1 class="title">Fiesta temática Kuromi 💜</h1>
+            <p class="subtitle" id="subtitle">Confirma tu asistencia para ver todos los detalles ✨</p>
+          </div>
+        </div>
+
+        <div class="stepDots">
+          <div class="dot" id="d1"></div>
+          <div class="dot" id="d2"></div>
+          <div class="dot" id="d3"></div>
+        </div>
+
+        <div class="content">
+          <div class="grid">
+            <div class="panel fadeIn" id="panelLeft"></div>
+
+            <div class="panel kitty fadeIn">
+              <div class="blob"></div>
+              <div class="kuromiWrap">
+                <div class="sparkles"></div>
+                <img class="kuromiImg" src="/src/images/kuromi.png" alt="Kuromi" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script define:vars={{ APP_SCRIPT_URL, PARTY }}>
+      const state = {
+        step: 1,
+        phone: "",
+        nombre: "",
+        apellido: "",
+        parentezco: "amigos",
+      };
+
+      const el = {
+        badgePhone: document.getElementById("badgePhone"),
+        subtitle: document.getElementById("subtitle"),
+        panelLeft: document.getElementById("panelLeft"),
+        d1: document.getElementById("d1"),
+        d2: document.getElementById("d2"),
+        d3: document.getElementById("d3"),
+      };
+
+      function getQueryParam(key) {
+        const u = new URL(window.location.href);
+        return u.searchParams.get(key) || "";
+      }
+
+      function setDots(step) {
+        [el.d1, el.d2, el.d3].forEach((d, i) => {
+          d.classList.toggle("active", i + 1 === step);
+        });
+      }
+
+      function escapeHtml(str) {
+        return (str || "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;");
+      }
+
+      function gotoConfirmado() {
+        localStorage.setItem("kuromi_confirmed", "1");
+
+        // construye /confirmado respetando subcarpeta de GitHub Pages
+        const basePath = window.location.pathname.replace(/\/$/, "");
+        const url = new URL(
+          `${window.location.origin}${basePath}/confirmado`,
+          window.location.origin
+        );
+
+        url.searchParams.set("nombre", state.nombre.trim());
+        url.searchParams.set("apellido", state.apellido.trim());
+        url.searchParams.set("par", state.parentezco);
+        if (state.phone) url.searchParams.set("phone", state.phone);
+
+        window.location.href = url.toString();
+      }
+
+      function render() {
+        setDots(state.step);
+
+        el.badgePhone.textContent = state.phone
+          ? `📱 Invitación: ${state.phone}`
+          : `🎀 Invitación`;
+
+        if (state.step === 1) {
+          el.subtitle.textContent = "Entra, confirma tu asistencia y desbloquea la invitación ✨";
+          el.panelLeft.innerHTML = `
+            <div class="fadeIn">
+              <h2 style="margin:0 0 8px;">¡Holiii! 💜</h2>
+              <p style="margin:0; opacity:.92; line-height:1.45;">
+                Esta es una invitación súper especial. Primero confirma tu asistencia
+                y luego verás todos los detalles de la fiesta 🎉
+              </p>
+
+              <div class="notice" style="margin-top:14px;">
+                <b>Importante:</b> El número se toma del enlace. Si te enviaron un link especial,
+                ábrelo desde WhatsApp.
+              </div>
+
+              <div class="footerActions">
+                <button class="btn" id="btnStart" type="button">¡Empezar!</button>
+              </div>
+            </div>
+          `;
+
+          document.getElementById("btnStart").onclick = () => {
+            state.step = 2;
+            render();
+          };
+        }
+
+        if (state.step === 2) {
+          el.subtitle.textContent = "Completa tus datos y elige tu parentezco 💫";
+          el.panelLeft.innerHTML = `
+            <div class="fadeIn">
+              <h2 style="margin:0 0 10px;">Confirmación</h2>
+
+              <div class="row">
+                <div>
+                  <p class="label">Nombre</p>
+                  <input class="input" id="nombre" placeholder="Ej: Andrea" value="${escapeHtml(state.nombre)}" />
+                </div>
+                <div>
+                  <p class="label">Apellido</p>
+                  <input class="input" id="apellido" placeholder="Ej: Torres" value="${escapeHtml(state.apellido)}" />
+                </div>
+              </div>
+
+              <div style="margin-top:12px;">
+                <p class="label">Parentezco con la cumpleañera</p>
+                <div class="choice">
+                  <label class="pill ${state.parentezco === "amigos" ? "active" : ""}" id="pillAmigos">
+                    <input type="radio" name="parentezco" value="amigos" ${state.parentezco === "amigos" ? "checked" : ""}/>
+                    👯 Amigos
+                  </label>
+                  <label class="pill ${state.parentezco === "familia" ? "active" : ""}" id="pillFamilia">
+                    <input type="radio" name="parentezco" value="familia" ${state.parentezco === "familia" ? "checked" : ""}/>
+                    👨‍👩‍👧‍👦 Familia
+                  </label>
+                </div>
+              </div>
+
+              <div class="notice" style="margin-top:14px;">
+                Al confirmar, se guardará tu asistencia en la lista.
+              </div>
+
+              <div class="footerActions">
+                <button class="btn secondary" id="btnBack" type="button">Atrás</button>
+                <button class="btn" id="btnConfirm" type="button">Confirmar invitación ✅</button>
+              </div>
+            </div>
+          `;
+
+          const nombre = document.getElementById("nombre");
+          const apellido = document.getElementById("apellido");
+
+          nombre.oninput = (e) => (state.nombre = e.target.value);
+          apellido.oninput = (e) => (state.apellido = e.target.value);
+
+          document.getElementById("pillAmigos").onclick = () => {
+            state.parentezco = "amigos";
+            render();
+          };
+          document.getElementById("pillFamilia").onclick = () => {
+            state.parentezco = "familia";
+            render();
+          };
+
+          document.getElementById("btnBack").onclick = () => {
+            state.step = 1;
+            render();
+          };
+
+          document.getElementById("btnConfirm").onclick = async () => {
+            const n = (state.nombre || "").trim();
+            const a = (state.apellido || "").trim();
+            if (!n || !a) {
+              alert("Por favor escribe tu nombre y apellido 💜");
+              return;
+            }
+            state.step = 3;
+            render();
+            await sendToSheet();
+            gotoConfirmado();
+          };
+        }
+
+        if (state.step === 3) {
+          el.subtitle.textContent = "Guardando tu confirmación… 💌";
+          el.panelLeft.innerHTML = `
+            <div class="fadeIn">
+              <h2 style="margin:0 0 10px;">¡Yei! ✨</h2>
+              <p style="margin:0; opacity:.92; line-height:1.45;">
+                Estamos guardando tu confirmación en la lista…
+              </p>
+
+              <div style="margin-top:14px; display:flex; gap:10px; align-items:center;">
+                <div style="width:14px;height:14px;border-radius:50%; background:rgba(255,255,255,.18); position:relative; overflow:hidden;">
+                  <div style="width:14px;height:14px;border-radius:50%; background:linear-gradient(90deg,var(--pink),var(--cyan)); animation: spin 1s linear infinite;"></div>
+                </div>
+                <div style="opacity:.9;">Un segundito 💜</div>
+              </div>
+
+              <style>
+                @keyframes spin{ from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+              </style>
+
+              <div class="notice" style="margin-top:14px;">
+                Si por alguna razón tu navegador bloquea la respuesta, igual quedará guardado.
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      async function sendToSheet() {
+        try {
+          const payload = {
+            phone: state.phone,
+            nombre: state.nombre.trim(),
+            apellido: state.apellido.trim(),
+            parentezco: state.parentezco,
+            userAgent: navigator.userAgent,
+            page: window.location.href,
+            notes: "",
+          };
+
+          await fetch(APP_SCRIPT_URL, {
+            method: "POST",
+            redirect: "follow",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+        } catch (err) {
+          console.warn("No se pudo enviar (o CORS bloqueó lectura).", err);
+        }
+      }
+
+      // Init
+      state.phone = getQueryParam("phone");
+      render();
+
+      // Si ya confirmaron antes, manda directo a confirmado (sin reenviar)
+      if (localStorage.getItem("kuromi_confirmed") === "1") {
+        gotoConfirmado();
+      }      
+
+    </script>
+  </body>
+</html>
