@@ -62,7 +62,7 @@ const PARTY = {
     <script define:vars={{ APP_SCRIPT_URL, PARTY }}>
       const state = {
         step: 1,
-        phone: "",
+        edadInvitado: "",
         nombre: "",
         apellido: "",
         parentezco: "amigos",
@@ -116,9 +116,10 @@ const PARTY = {
       function render() {
         setDots(state.step);
 
-        el.badgePhone.textContent = state.phone
-          ? `📱 Invitación: ${state.phone}`
+        el.badgePhone.textContent = state.edadInvitado
+          ? `🎈 Edad: ${state.edadInvitado}`
           : `🎀 Invitación`;
+
 
         if (state.step === 1) {
           el.subtitle.textContent = "Entra, confirma tu asistencia y desbloquea la invitación ✨";
@@ -131,9 +132,9 @@ const PARTY = {
               </p>
 
               <div class="notice" style="margin-top:14px;">
-                <b>Importante:</b> El número se toma del enlace. Si te enviaron un link especial,
-                ábrelo desde WhatsApp.
+                <b>Importante:</b> Completa tus datos para confirmar tu asistencia 💜
               </div>
+
 
               <div class="footerActions">
                 <button class="btn" id="btnStart" type="button">¡Empezar!</button>
@@ -161,6 +162,10 @@ const PARTY = {
                 <div>
                   <p class="label">Apellido</p>
                   <input class="input" id="apellido" placeholder="Ej: Torres" value="${escapeHtml(state.apellido)}" />
+                </div>
+                 <div>
+                  <p class="label">Edad</p>
+                  <input class="input" id="edadInvitado" inputmode="numeric" placeholder="Ej: 25" value="${escapeHtml(state.edadInvitado)}" />
                 </div>
               </div>
 
@@ -191,9 +196,16 @@ const PARTY = {
 
           const nombre = document.getElementById("nombre");
           const apellido = document.getElementById("apellido");
+          const edadInvitado = document.getElementById("edadInvitado");
 
           nombre.oninput = (e) => (state.nombre = e.target.value);
           apellido.oninput = (e) => (state.apellido = e.target.value);
+          edadInvitado.oninput = (e) => {
+            // solo números y máximo 2 dígitos (opcional)
+            state.edadInvitado = (e.target.value || "").replace(/\D/g, "").slice(0, 2);
+            e.target.value = state.edadInvitado;
+          };
+
 
           document.getElementById("pillAmigos").onclick = () => {
             state.parentezco = "amigos";
@@ -211,11 +223,19 @@ const PARTY = {
 
           document.getElementById("btnConfirm").onclick = async () => {
             const n = (state.nombre || "").trim();
-            const a = (state.apellido || "").trim();
-            if (!n || !a) {
-              alert("Por favor escribe tu nombre y apellido 💜");
-              return;
-            }
+              const a = (state.apellido || "").trim();
+              const ed = (state.edadInvitado || "").trim();
+
+              if (!n || !a) {
+                alert("Por favor escribe tu nombre y apellido 💜");
+                return;
+              }
+
+              if (!ed) {
+                alert("Por favor escribe tu edad 🎈");
+                return;
+              }
+
             state.step = 3;
             render();
             await sendToSheet();
@@ -254,7 +274,7 @@ const PARTY = {
       async function sendToSheet() {
         try {
           const payload = {
-            phone: state.phone,
+            phone: state.edadInvitado,
             nombre: state.nombre.trim(),
             apellido: state.apellido.trim(),
             parentezco: state.parentezco,

@@ -89,9 +89,10 @@ body{
 }
 
 .title{
-  font-size: clamp(26px, 3.4vw, 40px);
+  font-size: clamp(30px, 3.4vw, 40px);
   margin:0;
   letter-spacing:.2px;
+  text-align: center;
 }
 
 .subtitle{
@@ -563,4 +564,69 @@ body{
 
 @media (max-width: 520px){
   .btnWide{ width:100%; }
+}
+/* ===== Edad celebrativa ===== */
+.ageHeadline{
+  font-size: clamp(1.3rem, 3vw, 1.7rem);
+  font-weight: 900;
+  text-align: center;
+  letter-spacing: .4px;
+  margin: 4px 0 2px;
+  color: #ffd9f2;
+  text-shadow:
+    0 6px 18px rgba(255,119,217,.45),
+    0 0 20px rgba(155,123,255,.35);
+  animation: popIn .9s cubic-bezier(.2,.9,.2,1) both;
+}
+
+.ageHeadline span{
+  color: #ff77d9;
+  font-size: 1.4em;
+  margin: 0 4px;
+  display: inline-block;
+  animation: bounceAge 1.6s infinite ease-in-out;
+}
+
+/* versión más pequeña para confirmado */
+.ageHeadline.small{
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+}
+
+@keyframes popIn{
+  from{ opacity:0; transform: translateY(6px) scale(.98); }
+  to{ opacity:1; transform: translateY(0) scale(1); }
+}
+
+@keyframes bounceAge{
+  0%,100%{ transform: translateY(0); }
+  50%{ transform: translateY(-6px); }
+}
+
+/* ===== Título principal celebrativo (Cumpleaños de Lya) ===== */
+.partyTitle{
+  text-align: center;
+  font-weight: 900;
+  letter-spacing: .2px;
+  margin: 4px 0 2px;
+  color: #ffffff;
+  text-shadow:
+    0 10px 28px rgba(155,123,255,.32),
+    0 0 22px rgba(255,119,217,.22);
+  animation: popIn .9s cubic-bezier(.2,.9,.2,1) both;
+}
+
+.partyTitle span{
+  background: linear-gradient(135deg, #ff77d9, #9b7bff, #64e7ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding: 0 2px;
+  display: inline-block;
+  animation: shimmer 2.6s ease-in-out infinite;
+}
+
+/* brillo suave que “respira” */
+@keyframes shimmer{
+  0%,100%{ filter: drop-shadow(0 0 0 rgba(255,119,217,0)); transform: translateY(0); }
+  50%{ filter: drop-shadow(0 10px 18px rgba(255,119,217,.28)); transform: translateY(-1px); }
 }
