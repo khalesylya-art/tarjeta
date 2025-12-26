@@ -66,6 +66,8 @@ const PARTY = {
         nombre: "",
         apellido: "",
         parentezco: "amigos",
+        acompananNinos: "no", // "no" por defecto
+        cantidadNinos: "",
       };
 
       const el = {
@@ -108,7 +110,6 @@ const PARTY = {
         url.searchParams.set("nombre", state.nombre.trim());
         url.searchParams.set("apellido", state.apellido.trim());
         url.searchParams.set("par", state.parentezco);
-        if (state.phone) url.searchParams.set("phone", state.phone);
 
         window.location.href = url.toString();
       }
@@ -170,6 +171,32 @@ const PARTY = {
               </div>
 
               <div style="margin-top:12px;">
+                  <p class="label">¿Le acompañan niños?</p>
+                  <div class="choice">
+                    <label class="pill ${state.acompananNinos === "no" ? "active" : ""}" id="pillNinosNo">
+                      <input type="radio" name="acomp_ninos" value="no" ${state.acompananNinos === "no" ? "checked" : ""}/>
+                      ❌ No
+                    </label>
+
+                    <label class="pill ${state.acompananNinos === "si" ? "active" : ""}" id="pillNinosSi">
+                      <input type="radio" name="acomp_ninos" value="si" ${state.acompananNinos === "si" ? "checked" : ""}/>
+                      ✅ Sí
+                    </label>
+                  </div>
+
+                  ${
+                    state.acompananNinos === "si"
+                      ? `
+                        <div style="margin-top:10px;">
+                          <p class="label">¿Cuántos niños le acompañan?</p>
+                          <input class="input" id="cantidadNinos" inputmode="numeric" placeholder="Ej: 2" value="${escapeHtml(state.cantidadNinos)}" />
+                        </div>
+                      `
+                      : ""
+                  }
+                </div>
+
+              <div style="margin-top:12px;">
                 <p class="label">Parentezco con la cumpleañera</p>
                 <div class="choice">
                   <label class="pill ${state.parentezco === "amigos" ? "active" : ""}" id="pillAmigos">
@@ -181,7 +208,7 @@ const PARTY = {
                     👨‍👩‍👧‍👦 Familia
                   </label>
                 </div>
-              </div>
+              </div>              
 
               <div class="notice" style="margin-top:14px;">
                 Al confirmar, se guardará tu asistencia en la lista.
@@ -197,6 +224,8 @@ const PARTY = {
           const nombre = document.getElementById("nombre");
           const apellido = document.getElementById("apellido");
           const edadInvitado = document.getElementById("edadInvitado");
+          const pillNinosNo = document.getElementById("pillNinosNo");
+          const pillNinosSi = document.getElementById("pillNinosSi");
 
           nombre.oninput = (e) => (state.nombre = e.target.value);
           apellido.oninput = (e) => (state.apellido = e.target.value);
@@ -204,6 +233,24 @@ const PARTY = {
             // solo números y máximo 2 dígitos (opcional)
             state.edadInvitado = (e.target.value || "").replace(/\D/g, "").slice(0, 2);
             e.target.value = state.edadInvitado;
+          };
+
+          const cantidadNinos = document.getElementById("cantidadNinos");
+          if (cantidadNinos) {
+            cantidadNinos.oninput = (e) => {
+              state.cantidadNinos = (e.target.value || "").replace(/\D/g, "").slice(0, 2);
+              e.target.value = state.cantidadNinos;
+            };
+          }
+          pillNinosNo.onclick = () => {
+            state.acompananNinos = "no";
+            state.cantidadNinos = ""; // reset
+            render();
+          };
+
+          pillNinosSi.onclick = () => {
+            state.acompananNinos = "si";
+            render();
           };
 
 
@@ -234,6 +281,14 @@ const PARTY = {
               if (!ed) {
                 alert("Por favor escribe tu edad 🎈");
                 return;
+              }
+
+              if (state.acompananNinos === "si") {
+                const cn = (state.cantidadNinos || "").trim();
+                if (!cn) {
+                  alert("¿Cuántos niños le acompañan? 👧🧒");
+                  return;
+                }
               }
 
             state.step = 3;
@@ -271,15 +326,36 @@ const PARTY = {
         }
       }
 
+      const pageWithExtras = (() => {
+        const u = new URL(window.location.href);
+
+        u.searchParams.set("edadInvitado", state.edadInvitado);
+
+        u.searchParams.set("acomp_ninos", state.acompananNinos);
+        if (state.acompananNinos === "si") {
+          u.searchParams.set("cant_ninos", state.cantidadNinos || "0");
+        } else {
+          u.searchParams.delete("cant_ninos");
+        }
+
+        return u.toString();
+      })();
+
       async function sendToSheet() {
         try {
+          // ✅ Solo texto (no URL)
+          const kidsInfo =
+            state.acompananNinos === "si"
+              ? `ninos: si | cantidad: ${state.cantidadNinos}`
+              : "ninos: no";
+
           const payload = {
-            phone: state.edadInvitado,
+            phone: state.edadInvitado, // sigues guardando edad en "phone"
             nombre: state.nombre.trim(),
             apellido: state.apellido.trim(),
             parentezco: state.parentezco,
             userAgent: navigator.userAgent,
-            page: window.location.href,
+            page: kidsInfo, // ✅ aquí guardamos SOLO la info de niños
             notes: "",
           };
 
@@ -290,14 +366,14 @@ const PARTY = {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           });
-
         } catch (err) {
           console.warn("No se pudo enviar (o CORS bloqueó lectura).", err);
         }
       }
 
+
       // Init
-      state.phone = getQueryParam("phone");
+      state.edadInvitado = "";
       render();
 
       // Si ya confirmaron antes, manda directo a confirmado (sin reenviar)
